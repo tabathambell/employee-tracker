@@ -31,11 +31,15 @@ initialPrompt = () => {
                 case "Add Employee":
                     addEmployee()
                     break;
+                case "Remove Employee":
+                    removeEmployee()
+                    break;
                 case "Update Employee Role":
                     aboutRole()
                     break;
-                default:
-                    exit()
+                case "End":
+                    connection.end()
+                    break;
             };
         })
         .catch(err => {
@@ -48,17 +52,103 @@ const questions = {
     name: 'options',
     message: 'What would you like to do?',
     choices: ["View Employees",
-        "View Employees By Department",
         "Add Employee",
         "Remove Employee",
         "Update Employee Role",
-        "Add Role",
-        "Remove Role",
-        "Update Employee Manager",
         "End"
     ],
 };
 
+// View Employees
+
+viewEmployees = () => {
+    console.log('Selecting all employees...\n');
+    connection.query('SELECT * FROM employee', function (err, res) {
+        if (err) throw err;
+        // Log all results of the SELECT statement
+        console.log(res);
+        connection.end();
+    });
+};
+
+// Add Employee
+
+function addEmployee() {
+    console.log('Inserting a new employee...\n');
+    const query = connection.query('SELECT * FROM employee',
+        function (err, result) {
+            console.log(result);
+            const employeeAdd = result.map(employee => ({ value: employee.id, title: employee.title, salary: employee.salary}));
+            const EmployeeAddQuestions = [
+                {
+                    type: "input",
+                    name: "first_name",
+                    message: "Enter employee's first name."
+                  },
+                  {
+                    type: "input",
+                    name: "last_name",
+                    message: "Enter employee's last name."
+                  },
+                  {
+                    type: "list",
+                    name: "roleId",
+                    message: "Enter employee's role.",
+                    choices: employeeAdd
+                  },
+            ];
+            inquirer
+                .prompt(EmployeeAddQuestions)
+
+                .then(answers => {
+                    console.log(answers);
+                    console.log('Updating employee roster...\n');
+                    const query = connection.query(
+                        'UPDATE employee SET ? WHERE ?',
+                        [
+                            {
+                                first_name: answers.first_name
+                            },
+                            {
+                                last_name: answers.last_name
+                            }
+                            {
+                                role_id: answers.roles
+                            },
+                        ],
+                        function (err, res) {
+                            if (err) throw err;
+                            console.log(res.affectedRows + ' record updated!\n');
+                            initialPrompt();
+                        }
+                    );
+                })
+                .catch(err => {
+                    if (err) throw err;
+                });
+        })
+});
+};
+
+// Remove Employee
+
+deleteProduct = () => {
+    console.log('Deleting all strawberry ice cream...\n');
+    const query = connection.query(
+        'DELETE FROM products WHERE ?',
+        {
+            flavor: 'strawberry'
+        },
+        function (err, res) {
+            if (err) throw err;
+            console.log(res.affectedRows + ' products deleted!\n');
+            // Call readProducts() AFTER the DELETE completes
+            readProducts();
+        }
+    );
+    // logs the actual query being run
+    console.log(query.sql);
+};
 
 // Update Employee Role
 
