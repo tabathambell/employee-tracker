@@ -66,7 +66,7 @@ viewEmployees = () => {
     connection.query('SELECT * FROM employee', function (err, res) {
         if (err) throw err;
         // Log all results of the SELECT statement
-        console.log(res);
+        console.log(cTable);
         connection.end();
     });
 };
@@ -75,10 +75,9 @@ viewEmployees = () => {
 
 function addEmployee() {
     console.log('Inserting a new employee...\n');
-    const query = connection.query('SELECT * FROM employee',
+    const query = connection.query('SELECT * FROM role',
         function (err, result) {
-            console.log(result);
-            const employeeAdd = result.map(employee => ({ value: employee.id, title: employee.title, salary: employee.salary}));
+            const employeeAdd = result.map(role => ({ name: role.title, value: role.id }));
             const EmployeeAddQuestions = [
                 {
                     type: "input",
@@ -104,18 +103,12 @@ function addEmployee() {
                     console.log(answers);
                     console.log('Updating employee roster...\n');
                     const query = connection.query(
-                        'UPDATE employee SET ? WHERE ?',
-                        [
+                        'INSERT INTO employee SET ?',
                             {
-                                first_name: answers.first_name
+                                first_name: answers.first_name,
+                                last_name: answers.last_name,
+                                role_id: answers.roleId
                             },
-                            {
-                                last_name: answers.last_name
-                            }
-                            {
-                                role_id: answers.roles
-                            },
-                        ],
                         function (err, res) {
                             if (err) throw err;
                             console.log(res.affectedRows + ' record updated!\n');
@@ -127,27 +120,61 @@ function addEmployee() {
                     if (err) throw err;
                 });
         })
-});
 };
 
 // Remove Employee
 
-deleteProduct = () => {
-    console.log('Deleting all strawberry ice cream...\n');
-    const query = connection.query(
-        'DELETE FROM products WHERE ?',
-        {
-            flavor: 'strawberry'
-        },
-        function (err, res) {
-            if (err) throw err;
-            console.log(res.affectedRows + ' products deleted!\n');
-            // Call readProducts() AFTER the DELETE completes
-            readProducts();
-        }
-    );
-    // logs the actual query being run
-    console.log(query.sql);
+function removeEmployee() {
+    const query = connection.query('SELECT * FROM employee',
+        function (err, result) {
+            console.log(result);
+            const employeeNames = result.map(employee => ({ name: employee.first_name + " " + employee.last_name, value: employee.id }));
+            const query = connection.query('SELECT * FROM role',
+                function (err, result) {
+                    console.log(result);
+                    const employeeRoles = result.map(role => ({ name: role.title, value: role.id }));
+                    const EmployeeRoleQuestions = [
+                        {
+                            type: 'list',
+                            name: 'employee',
+                            message: 'What employee do you want to update?',
+                            choices: employeeNames,
+                        },
+                        {
+                            type: 'list',
+                            name: 'roles',
+                            message: "What is the employee's new role?",
+                            choices: employeeRoles,
+                        },
+                    ];
+                    inquirer
+                        .prompt(EmployeeRoleQuestions)
+
+                        .then(answers => {
+                            console.log(answers);
+                            console.log('Updating employee role...\n');
+                            const query = connection.query(
+                                'UPDATE employee SET ? WHERE ?',
+                                [
+                                    {
+                                        role_id: answers.roles
+                                    },
+                                    {
+                                        id: answers.employee
+                                    }
+                                ],
+                                function (err, res) {
+                                    if (err) throw err;
+                                    console.log(res.affectedRows + ' record updated!\n');
+                                    initialPrompt();
+                                }
+                            );
+                        })
+                        .catch(err => {
+                            if (err) throw err;
+                        });
+                })
+        });
 };
 
 // Update Employee Role

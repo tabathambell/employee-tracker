@@ -1,11 +1,11 @@
-INSERT INTO company.department(id, name)
+INSERT INTO company.department(name)
 VALUES
 (1, 'Sales'),
 (2, 'Engineering'),
 (3, 'Finance'),
 (4, 'Legal');
 
-INSERT INTO company.role(id, title, salary, department_id)
+INSERT INTO company.role(title, salary, department_id)
 VALUES
 (1, 'Sales Lead', 100000, 1),
 (2, 'Salesperson', 80000, 1),
@@ -15,7 +15,7 @@ VALUES
 (6, 'Legal Team Lead', 250000, 4),
 (7, 'Lawyer', 190000, 4);
 
-INSERT INTO company.employee(id, first_name, last_name, role_id, manager_id)
+INSERT INTO company.employee(first_name, last_name, role_id, manager_id)
 VALUES
 (1, 'John', 'Doe', 1, 3),
 (2, 'Mike', 'Chan', 2, 1),
