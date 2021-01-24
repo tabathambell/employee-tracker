@@ -25,6 +25,12 @@ initialPrompt = () => {
 
         .then(answers => {
             switch (answers.options) {
+                case "View Departments":
+                    viewDepartments()
+                    break;
+                case "View Roles":
+                    viewRoles()
+                    break;
                 case "View Employees":
                     viewEmployees()
                     break;
@@ -51,12 +57,38 @@ const questions = {
     type: 'list',
     name: 'options',
     message: 'What would you like to do?',
-    choices: ["View Employees",
+    choices: ["View Departments",
+        "View Roles",
+        "View Employees",
         "Add Employee",
         "Remove Employee",
         "Update Employee Role",
         "End"
     ],
+};
+
+// View Departments
+
+viewDepartments = () => {
+    console.log('Selecting all departments...\n');
+    connection.query('SELECT * FROM department', function (err, res) {
+        if (err) throw err;
+        // Log all results of the SELECT statement
+        console.table(res);
+        connection.end();
+    });
+};
+
+// View Roles
+
+viewRoles = () => {
+    console.log('Selecting all roles...\n');
+    connection.query('SELECT * FROM role', function (err, res) {
+        if (err) throw err;
+        // Log all results of the SELECT statement
+        console.table(res);
+        connection.end();
+    });
 };
 
 // View Employees
